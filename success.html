@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed — The Crowned Skein</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { cream:'#FBF6EC', oat:'#EFE3CC', tan:'#C9A97C', cocoa:'#5A4230', ink:'#38291C', rust:'#A85C3B' },
+      fontFamily: { serif:['Fraunces','serif'], sans:['Inter','sans-serif'] }
+    } }
+  }
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#FBF6EC;color:#38291C}
+  h1,.font-display{font-family:'Fraunces',serif}
+</style>
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center px-6">
+  <div class="max-w-md text-center">
+    <div class="text-5xl mb-4">🧶</div>
+    <h1 class="font-display text-3xl md:text-4xl mb-3">Thank You!</h1>
+    <p class="text-cocoa/80 leading-relaxed mb-2">
+      Your order has been placed successfully. A confirmation will be sent to the
+      email or phone number you provided at checkout.
+    </p>
+    <p class="text-cocoa/80 leading-relaxed mb-6">
+      Fifty percent of your purchase goes straight toward the Educational Grant
+      for a local Accelerated Nursing Student at Mercy College — thank you for
+      being part of that.
+    </p>
+    <p id="order-ref" class="text-xs text-cocoa/50 mb-6"></p>
+    <a href="/" class="inline-block bg-rust text-cream rounded-full px-6 py-2.5 font-medium hover:bg-cocoa transition-colors">Back to Shop</a>
+  </div>
+
+  <script>
+    // Stripe appends ?session_id=cs_... to this page's URL after a successful
+    // payment (see success_url in netlify/functions/create-checkout-session.js).
+    // We only show a short reference here — never call Stripe's API with a
+    // secret key from this page, since it's public and client-side.
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      document.getElementById('order-ref').textContent =
+        'Order reference: ' + sessionId.slice(-12);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Crowned Skein — Handmade in Pella, Iowa</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { cream:'#FBF6EC', oat:'#EFE3CC', tan:'#C9A97C', cocoa:'#5A4230', ink:'#38291C', rust:'#A85C3B' },
+      fontFamily: { serif:['Fraunces','serif'], sans:['Inter','sans-serif'] }
+    } }
+  }
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#FBF6EC;color:#38291C}
+  h1,h2,h3,.font-display{font-family:'Fraunces',serif}
+  .carousel-track{transition:transform .35s ease}
+  .dot.active{background:#5A4230}
+  .buy-now-btn[data-disabled="true"]{opacity:.45;cursor:not-allowed}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- LOGO — fixed in place, stays visible while the page scrolls.
+     Swap the src below for your real logo file once it's in /images/. -->
+<img src="images/TCS-logo.png" alt="The Crowned Skein logo"
+     style="position:fixed; top:calc(0.75rem + env(safe-area-inset-top, 0px)); left:0.75rem; z-index:50; width:56px; height:56px; border-radius:9999px; object-fit:cover; border:2px solid #FBF6EC; box-shadow:0 2px 8px rgba(0,0,0,0.15);"
+     onerror="this.onerror=null;this.src=&quot;data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%235A4230'/%3E%3Ctext x='50' y='63' font-family='Georgia,serif' font-size='42' fill='%23FBF6EC' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E&quot;;">
+
+<!-- 1. PROGRESS BANNER -->
+<!--
+  Banner Adjustment
+  -----------------
+  Everything about this banner is edited right here, no JavaScript involved:
+    1. Headline text / goal wording -> edit the sentence inside the <p> tag below.
+    2. Campaign end date -> edit "Campaign ends October 31st" in that same sentence.
+    3. Progress bar fill -> change the width:9.25% inline style on the inner
+       <div class="h-full bg-tan..."> line. Set it to (amount raised / goal) * 100.
+       Example: $1,200 raised of $4,000 goal = width:30%.
+    4. "$X raised of $Y goal" caption -> edit the numbers in the <p id="..."> line
+       right below the bar. Update this every time you update the width above
+       so the bar and the text always match.
+  There is nothing else to touch — no separate variable elsewhere controls
+  the banner's numbers or text.
+-->
+<div class="bg-cocoa text-cream px-4 py-4 text-center">
+  <p class="text-sm md:text-base">Help us fund a <span class="font-semibold">$4,000 Educational Grant</span> for a local Accelerated Nursing Student at Mercy College! Campaign ends October 31st.</p>
+  <div class="max-w-xl mx-auto mt-2">
+    <div class="w-full h-3 bg-cream/20 rounded-full overflow-hidden">
+      <div class="h-full bg-tan rounded-full" style="width:0%"></div>
+    </div>
+    <p class="text-xs mt-1 text-cream/80">$0 raised of $4,000 goal</p>
+  </div>
+</div>
+
+<!-- 2. HERO / OUR STORY -->
+<section class="max-w-3xl mx-auto px-6 py-16 text-center">
+  <h1 class="font-display text-4xl md:text-5xl mb-4">The Crowned Skein</h1>
+  <p class="text-cocoa/80 leading-relaxed">The Crowned Skein is a permanent, Pella-based handmade boutique, stitched together one cozy piece at a time. This season, <span class="font-semibold text-rust">50% of every purchase</span> goes directly into an educational grant check &mdash; helping an Iowa nursing student cover critical tuition and clinical rotation fees. Our campaign concludes on <span class="font-semibold">October 31, 2026</span>, when we'll present the final check to the student ahead of their November tuition deadline.</p>
+</section>
+
+<!-- 3. PRODUCT CATALOG -->
+<main class="max-w-6xl mx-auto px-4 sm:px-6 pb-24 grid lg:grid-cols-[1fr_340px] gap-10">
+  <div>
+    <section class="mb-14">
+      <h2 class="font-display text-2xl mb-5 border-b border-tan/40 pb-2">Combo Packages &amp; Boxes</h2>
+      <div id="combo-grid" class="grid sm:grid-cols-2 gap-6"></div>
+    </section>
+    <section>
+      <h2 class="font-display text-2xl mb-5 border-b border-tan/40 pb-2">Individual Items</h2>
+      <div id="single-grid" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    </section>
+  </div>
+
+  <!-- 4. CHECKOUT SIDEBAR -->
+  <aside class="lg:sticky lg:top-6 h-fit bg-oat/50 border border-tan/40 rounded-2xl p-5">
+    <h3 class="font-display text-xl mb-3">Order Summary</h3>
+    <ul id="cart-items" class="text-sm space-y-3 mb-3 min-h-[2rem]">
+      <li class="text-cocoa/50 italic">Your cart is empty.</li>
+    </ul>
+    <div class="border-t border-tan/40 pt-3 space-y-1 text-sm">
+      <div class="flex justify-between"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+      <div class="flex justify-between"><span>Estimated Tax (7% IA)</span><span id="cart-tax">$0.00</span></div>
+      <div class="flex justify-between"><span>Shipping</span><span id="cart-shipping">$6.00</span></div>
+      <div class="flex justify-between font-semibold text-base pt-1"><span>Total</span><span id="cart-total">$0.00</span></div>
+    </div>
+    <p class="text-[11px] text-cocoa/50 mt-1">Tax shown is an estimate for the Pella, IA rate. Exact tax is calculated on Stripe's secure checkout page.</p>
+
+    <div class="border-t border-tan/40 mt-3 pt-3 text-sm space-y-2">
+      <label class="block text-xs text-cocoa/70 mb-1" for="f-contact">Email or Phone Number for Delivery Updates</label>
+      <input id="f-contact" type="text" placeholder="you@example.com or (555) 123-4567" class="w-full border border-tan/50 rounded-lg px-3 py-2 text-sm" required>
+    </div>
+
+    <div class="border-t border-tan/40 mt-3 pt-3 text-sm space-y-2">
+      <label class="flex items-start gap-2 cursor-pointer">
+        <input type="radio" name="delivery" value="ship" checked class="mt-1">
+        <span>Ship to Me ($6.00 Flat Rate USPS Ground Advantage)</span>
+      </label>
+      <label class="flex items-start gap-2 cursor-pointer">
+        <input type="radio" name="delivery" value="pickup" class="mt-1">
+        <span>Free High Point Apartment Delivery / Local Pella Pickup ($0)</span>
+      </label>
+      <p class="text-xs text-cocoa/60 italic">Nationwide shipping via USPS Ground Advantage for a $6.00 flat rate!</p>
+      <p id="ship-note" class="text-xs text-cocoa/60">You'll securely enter your shipping address on the Stripe Checkout page when you click a Buy Now button.</p>
+
+      <div id="pickup-fields" class="hidden space-y-2 pt-1">
+        <input id="f-building" type="text" placeholder="Building Number" class="w-full border border-tan/50 rounded-lg px-3 py-2 text-sm" required>
+        <input id="f-apt" type="text" placeholder="Apartment Number" class="w-full border border-tan/50 rounded-lg px-3 py-2 text-sm" required>
+      </div>
+    </div>
+
+    <button id="checkout-cart-btn" class="w-full bg-rust text-cream rounded-full py-2.5 mt-4 font-medium hover:bg-cocoa transition-colors">Checkout Full Cart</button>
+    <p class="text-[11px] text-cocoa/50 mt-2 leading-snug">Sends every item in your cart above — including chosen colors and custom-order notes — to Stripe's secure page as one order.</p>
+
+    <button id="copy-summary-btn" class="w-full bg-white border border-rust text-rust rounded-full py-2.5 mt-3 font-medium hover:bg-rust hover:text-cream transition-colors">Copy Order Summary</button>
+    <p class="text-[11px] text-cocoa/50 mt-2 leading-snug">Copies your cart, contact info, and delivery notes as text — handy to send directly to The Crowned Skein as a backup.</p>
+  </aside>
+</main>
+
+<footer class="text-center text-xs text-cocoa/60 py-8 border-t border-tan/30">The Crowned Skein &middot; Pella, Iowa</footer>
+
+<script>
+/* =====================================================================
+   THE CROWNED SKEIN — SITE CONFIG
+   =====================================================================
+   Everything you'll ever need to touch to add a product, swap a photo,
+   or connect a new price lives in ONE of the four blocks below:
+
+     1. STRIPE_LINKS      -> per-item "Buy Now" checkout links
+     2. TAX_RATE           -> the estimated tax % shown in the cart
+     3. PLACEHOLDER_IMG    -> fallback graphic (don't need to touch this)
+     4. PRODUCTS           -> the actual catalog (name, price, photos, colors)
+
+   After PRODUCTS, everything else is display/behavior code — you
+   shouldn't need to edit past that unless you're changing how the
+   site *works*, not what it *sells*.
+   ===================================================================== */
+
+// ---- 1. STRIPE "BUY NOW" LINKS (one item, paid instantly) ----
+// Each key below is a product's `id` (must exactly match the `id` used in
+// the PRODUCTS list further down). The value is that product's Stripe
+// Payment Link URL — NOT a price_... ID. To get one:
+//   Stripe Dashboard -> Product catalog -> open the price -> "Create payment link"
+//   -> copy the resulting https://buy.stripe.com/... URL and paste it below.
+//
+// TO ADD A NEW PRODUCT'S LINK: add a new line   'your-product-id': 'https://buy.stripe.com/...',
+// TO ADD A PRODUCT WITH MULTIPLE PRICE TIERS (like the cactus monster or the
+// scrunchies): use an object mapping each tier's `key` to its own link, e.g.
+//   { small: 'url', medium: 'url', large: 'url' }
+//   — each key must exactly match a `key` in that product's `priceOptions`
+//   array below (NOT the price number — two tiers can share a price, like
+//   the $7 Heavy-Ruffle and Jumbo scrunchies, so keys keep them separate).
+// Leaving a value as '' just greys out that item's Buy Now button until you add one.
+const STRIPE_LINKS = {
+  'gift-box': 'https://buy.stripe.com/9B66oHb64coi7ulgwM0gw0e',
+  'tweed-box': 'https://buy.stripe.com/aFaaEX3DC4VQg0R6Wc0gw0f',
+  'scrunchie-pack': 'https://buy.stripe.com/eVq7sLdec73Y7ulgwM0gw00',
+  'scrunchie-jumbo': {
+    mini: 'https://buy.stripe.com/bJe00jca81JE15X1BS0gw0m',
+    standard: 'https://buy.stripe.com/fZu14n1vucoi7ula8o0gw01', // confirmed correct
+    heavy: 'https://buy.stripe.com/8x23cv4HGewq7ulbcs0gw0l',
+    jumbo: 'https://buy.stripe.com/cNi6oH0rq73Yg0R1BS0gw0k' // now a distinct link from heavy — good
+  },
+  'beanie-luxury': 'https://buy.stripe.com/6oU14n0rqcoi9Ct5S80gw0d',
+  'beanie-split': 'https://buy.stripe.com/5kQbJ1eig1JE6qhcgw0gw0a',
+  'scarf': 'https://buy.stripe.com/00w7sL7TS1JE5mdcgw0gw0j',
+  'shawl': 'https://buy.stripe.com/fZu6oH2zy1JEcOFbcs0gw0b',
+  'headband': 'https://buy.stripe.com/7sY4gzgqodsm9Cta8o0gw09',
+  'handwarmers': 'https://buy.stripe.com/8x200jca80FA3e5a8o0gw08',
+  'bow-bag': 'https://buy.stripe.com/aFa9AT4HGfAu6qhfsI0gw07',
+  'monster-plushie': 'https://buy.stripe.com/3cIcN5b64fAu8ypeoE0gw06',
+  'cactus-monster': {
+    small: 'https://buy.stripe.com/3cI14ngqo5ZUg0R94k0gw03',
+    medium: 'https://buy.stripe.com/4gM00j0rqewq8yp1BS0gw0n',
+    large: 'https://buy.stripe.com/14A3cv6POgEy5md5S80gw0o'
+  },
+  'keychain': 'https://buy.stripe.com/6oU9ATeig1JE8ypeoE0gw0g'
+  // <-- add new products' links here, comma-separated
+};
+
+// ---- 2. ESTIMATED SALES TAX ----
+// Shown in the cart sidebar as a preview only — the real, authoritative tax
+// is whatever Stripe calculates at checkout (via Stripe Tax, if enabled).
+// Update this if your local rate changes.
+const TAX_RATE = 0.07; // Pella, IA combined sales tax (6% state + 1% county) — estimate only
+
+// ---- 3. PLACEHOLDER PHOTO (shown until you add a real image) ----
+// This is an inline drawing, not a file — you don't need to touch it. It
+// automatically appears any time an <img> tag's `src` fails to load (e.g.
+// because you haven't uploaded that filename to /images/ yet).
+const PLACEHOLDER_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'>
+    <rect width='400' height='300' fill='#EFE3CC'/>
+    <g fill='none' stroke='#A85C3B' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'>
+      <rect x='130' y='100' width='140' height='100' rx='10'/>
+      <circle cx='163' cy='130' r='11'/>
+      <path d='M130 178 L172 145 L205 168 L238 145 L270 178'/>
+    </g>
+    <text x='200' y='232' font-family='Inter, sans-serif' font-size='15' fill='#5A4230' text-anchor='middle'>Photo coming soon</text>
+  </svg>`
+);
+
+// ---- 4. PRODUCT CATALOG ----
+// This is the list you'll edit most often. Each product is one { ... } object.
+// Fields you can use on any product:
+//   id          (required) short unique code, e.g. 'beanie-luxury'. Must match
+//               the key you use for it in STRIPE_LINKS above.
+//   cat         (required) 'combo' (shows in "Combo Packages & Boxes") or
+//               'single' (shows in "Individual Items")
+//   name        (required) product title shown on the card
+//   desc        (required) short description shown under the title
+//   price       fixed price, e.g. 20 for $20.00
+//   priceOptions  use INSTEAD of `price` for items with multiple tiers/sizes —
+//               an array of { key, label, price }, e.g.:
+//                 [ {key:'small', label:'Small — $12.00', price:12},
+//                   {key:'large', label:'Large — $25.00', price:25} ]
+//               Renders a dropdown using `label` for each option. `key` is
+//               what STRIPE_LINKS uses to find that tier's Buy Now link (use
+//               an object there, e.g. { small: 'url', large: 'url' }) — keys
+//               must be unique even if two tiers share the same `price`.
+//   priceLabel  optional text shown instead of a dollar amount, e.g. '3 for $12'
+//               (the underlying `price` is still what gets added to the cart)
+//   customFee   flat $ surcharge added when "Request Custom Customization" is
+//               checked. Set to 0 to hide the surcharge note entirely.
+//   variantLabel  optional — overrides the dropdown label text (defaults to
+//               "Select Color"); e.g. 'Select Style' for the keychains.
+//   hasPompomOption  set to true to show an "Include Pom-Pom?" toggle
+//               (defaults to checked/yes). The choice is captured per cart
+//               line and passed through to the order summary and checkout.
+//   hideCustomOption  set to true to remove the "Request Custom
+//               Customization/Color" checkbox entirely for this product —
+//               use this when a product's own dropdown (color, style, or
+//               swatch chart) already covers customization and a free-text
+//               request doesn't make sense (e.g. the cacti, keychains).
+//   images      (required) array of { src, color? } —
+//                 - src: the image path, e.g. 'images/beanie-cream.jpg'.
+//                   TO SWAP OR ADD A PHOTO: just change/add this path and
+//                   upload a file with that exact name to your /images/ folder.
+//                 - color: OPTIONAL. If you give every image in the array a
+//                   `color` name, a "Select Color" dropdown appears and
+//                   switches the carousel to match automatically. Leave it
+//                   off entirely for products where the images are just
+//                   different views (not different colors) of one item.
+//   swatchColors  OPTIONAL alternative to image-linked colors: an array of
+//               { name, hex } shown as clickable color circles instead of a
+//               text dropdown (used for yarn colors that don't have their
+//               own product photo per shade). Doesn't change the carousel.
+//
+// TO ADD A BRAND NEW PRODUCT: copy an existing { ... } block below, change
+// every field, give it a new unique `id`, add that `id` to STRIPE_LINKS
+// above, and it will automatically appear in the right grid — no other
+// code changes needed.
+
+// Lion Brand 24/7 Cotton colors for the scrunchie line (as supplied by client)
+const SCRUNCHIE_COLORS = [
+  {name:'White', hex:'#FFFFFF'}, {name:'Ecru', hex:'#FEFEE0'}, {name:'Linen / Beige', hex:'#E5DCC5'},
+  {name:'Taupe', hex:'#8B8175'}, {name:'Café Au Lait', hex:'#A68A70'}, {name:'Camel', hex:'#C19A6B'},
+  {name:'Charcoal / Black', hex:'#212121'},
+  {name:'Red / Cherry Pop', hex:'#CC2E38'}, {name:'Pink Lemonade', hex:'#FFB6C1'}, {name:'Pink', hex:'#FFC0CB'},
+  {name:'Rose / Dusty Rose', hex:'#DCAE96'}, {name:'Tangerine / Papaya', hex:'#F28C28'}, {name:'Burgundy / Beets', hex:'#7E2831'},
+  {name:'Navy / Admiral', hex:'#1B2A4A'}, {name:'Denim', hex:'#4A6B8A'}, {name:'Sky / Chambray', hex:'#8AA8C1'},
+  {name:'Aqua / Riviera', hex:'#4DA6FF'}, {name:'Purple / Wisteria', hex:'#8A6BBE'}, {name:'Eggplant', hex:'#5B3256'},
+  {name:'Lilac', hex:'#C8A2C8'},
+  {name:'Lemon / Goldenrod', hex:'#E5C158'}, {name:'Succulent / Granny Smith / Ivy League', hex:'#5C8A5C'}, {name:'Bay Leaf / Sage', hex:'#98A898'}
+];
+
+// Full yarn color chart for the Soft Plushies (as supplied by client)
+const PLUSHIE_COLORS = [
+  // Neutrals & Earth
+  {name:'White', hex:'#FFFFFF'}, {name:'Soft White', hex:'#F5F2EB'}, {name:'Aran', hex:'#E3DEC3'},
+  {name:'Buff', hex:'#D0B38C'}, {name:'Cafe Latte', hex:'#7F6451'}, {name:'Coffee', hex:'#3D2B1F'},
+  {name:'Black', hex:'#000000'},
+  // Reds & Pinks
+  {name:'Cherry Red', hex:'#A61018'}, {name:'Hot Red', hex:'#C8102E'}, {name:'Burgundy', hex:'#58111A'},
+  {name:'Petal Pink', hex:'#F9C1C9'}, {name:'Shocking Pink', hex:'#E4007C'},
+  // Yellows & Oranges
+  {name:'Cornmeal', hex:'#ECD38B'}, {name:'Saffron', hex:'#F1AB00'}, {name:'Gold', hex:'#CA9223'},
+  {name:'Carrot', hex:'#E65A28'},
+  // Greens
+  {name:'Spring Green', hex:'#75B843'}, {name:'Paddy Green', hex:'#006F3D'}, {name:'Hunter Green', hex:'#183028'},
+  {name:'Real Teal', hex:'#005A5B'},
+  // Blues
+  {name:'Turqua', hex:'#00A3A6'}, {name:'Light Blue', hex:'#95B2D1'}, {name:'Royal', hex:'#0D3692'},
+  {name:'Soft Navy', hex:'#1F2438'},
+  // Purples
+  {name:'Orchid', hex:'#B26AAB'}, {name:'Amethyst', hex:'#5F3D7A'}
+];
+
+const PRODUCTS = [
+  {id:'gift-box', cat:'combo', name:'Premium Cotton Gift Box', price:30, customFee:0,
+    desc:'1 cotton monster plushie, 1 keychain, and 1 matching scrunchie, boxed and ready to gift.',
+    images:[{src:'images/CottonboxFall.jpeg'},{src:'images/CottonBox.jpeg'}],
+    swatchColors:[
+      {name:'White', hex:'#F8F8F5'}, {name:'Ecru', hex:'#E9DFC7'}, {name:'Cool Grey', hex:'#A9A9A9'},
+      {name:'Silver', hex:'#C0C0C0'}, {name:'Charcoal', hex:'#3B3B3B'}, {name:'Taupe', hex:'#8B7D6B'},
+      {name:'Camel', hex:'#C19A6B'}, {name:'Cafe Au Lait', hex:'#A67B5B'}, {name:'Denim', hex:'#2E4A62'},
+      {name:'Navy', hex:'#1B2A4A'}, {name:'Sky', hex:'#87CEEB'}, {name:'Aqua', hex:'#4FC1CF'},
+      {name:'Jade', hex:'#00A86B'}, {name:'Bay Leaf', hex:'#6B8E6B'}, {name:'Lime', hex:'#A6D608'},
+      {name:'Succulent', hex:'#6B8E4E'}, {name:'Grass', hex:'#4C9A2A'}, {name:'Lemon', hex:'#FFF44F'},
+      {name:'Goldenrod', hex:'#DAA520'}, {name:'Amber', hex:'#FFBF00'}, {name:'Red', hex:'#C1272D'},
+      {name:'Magenta', hex:'#C71585'}, {name:'Rose', hex:'#C08081'}, {name:'Beets', hex:'#7B1E3A'},
+      {name:'Orchid', hex:'#9F5F9F'}, {name:'Lilac', hex:'#C8A2C8'}, {name:'Purple', hex:'#6A3E9E'},
+      {name:'Blue', hex:'#2A5CAA'}
+    ]},
+  {id:'tweed-box', cat:'combo', name:'3-Piece Cozy Tweed Box Set', price:65, customFee:0,
+    desc:'Bundle discount! Matching Beanie, Headband, and Hand Warmers in one cozy set.',
+    images:[
+      {src:'images/tweed-box-vanilla-oatmeal.jpg', color:'Vanilla Oatmeal'},
+      {src:'images/tweed-box-forest-moss.jpeg', color:'Forest Moss'},
+      {src:'images/tweed-box-woodland-bark.jpeg', color:'Woodland Bark'}
+    ]},
+  {id:'scrunchie-pack', cat:'single', name:'Scrunchie Packs', price:12, customFee:0, priceLabel:'3 for $12',
+    desc:'Curated acrylic autumn color mixes.', images:[{src:'images/scrunchie-fall-pack.jpeg'}], swatchColors:SCRUNCHIE_COLORS},
+  {id:'scrunchie-jumbo', cat:'single', name:'Scrunchies', customFee:0,
+    priceOptions:[
+      {key:'mini', label:'Mini Scrunchie — $3.00', price:3},
+      {key:'standard', label:'Standard Ruffle Scrunchie — $5.00', price:5},
+      {key:'heavy', label:'Heavy-Ruffle Scrunchie — $7.00', price:7},
+      {key:'jumbo', label:'Jumbo Scrunchie — $7.00', price:7}
+    ],
+    // One photo per size, in the SAME order as priceOptions above (index 0 =
+    // Mini, 1 = Standard, 2 = Heavy-Ruffle, 3 = Jumbo) so the picture always
+    // matches the selected size automatically.
+    desc:'Premium mercerized cotton texture.',
+    images:[
+      {src:'images/scrunchie-mini.jpg'},
+      {src:'images/scrunchie-standard.jpg'},
+      {src:'images/scrunchie-heavy-ruffle.jpg'},
+      {src:'images/scrunchie-jumbo-cotton.jpeg'}
+    ],
+    swatchColors:SCRUNCHIE_COLORS},
+  {id:'beanie-luxury', cat:'single', name:'Luxury Tweed Ribbed Beanie', price:35, customFee:0, hasPompomOption:true,
+    desc:'Thick ribbed rim, fluffy faux-fur pom-pom, custom leather tag.',
+    images:[{src:'images/beanie-cream.jpeg', color:'Vanilla Oatmeal Cream'},{src:'images/beanie-olive.jpeg', color:'Olive Forest Green'},{src:'images/beanie-brown.jpeg', color:'Woodland Dark Brown'}]},
+  {id:'beanie-split', cat:'single', name:'Custom Color Beanie', price:35, customFee:0, hasPompomOption:true,
+    desc:'Vibrant color-blocked ribbing, made to order in your choice of colors — check "Request Custom Customization" below and tell us your color combo.',
+    images:[{src:'images/custom-color-beanie.jpg'}]},
+  {id:'scarf', cat:'single', name:'Textured Weave Shawl', price:75, customFee:0,
+    desc:'Soft acrylic textured weave, draped in a flattering rectangular silhouette.', images:[{src:'images/textured-shawl.jpeg'}]},
+  {id:'shawl', cat:'single', name:'Elegant Ombré Tassel Shawls', price:55, customFee:0, hideCustomOption:true,
+    desc:'Gorgeous draped triangles with handmade corner tassels.',
+    images:[{src:'images/shawl-berry.jpg', color:'Deep Berry Gradient'},{src:'images/shawl-blue.jpg', color:'Classic Blue Gradient'},{src:'images/shawl-purple.jpg', color:'Twilight Wisteria Gradient'}]},
+  {id:'headband', cat:'single', name:'Twisted Tweed Ear Warmer Headband', price:20, customFee:0,
+    desc:'Ribbed ear warmer with a central twist.',
+    images:[{src:'images/headband-cream.jpeg', color:'Cream'},{src:'images/headband-olive.jpeg', color:'Olive Green'},{src:'images/headband-brown.jpeg', color:'Dark Brown'},{src:'images/headband-custom-solid.jpg', color:'Custom Solid Color'}]},
+  {id:'handwarmers', cat:'single', name:'Matching Tweed Hand Warmers', price:20, customFee:0,
+    desc:'Fingerless style with uniform ribbing.',
+    images:[{src:'images/handwarmers-cream.jpg', color:'Cream'},{src:'images/handwarmers-olive.jpg', color:'Olive Green'},{src:'images/handwarmers-brown.jpg', color:'Dark Brown'},{src:'images/handwarmers-custom-solid.jpg', color:'Custom Solid Color'}]},
+  {id:'bow-bag', cat:'single', name:'Crochet Bow Bags', price:65, customFee:0,
+    desc:'Statement shoulder bag with textured knit detailing. Fully lined with a magnetic clasp closure.',
+    images:[{src:'images/bow-bag.jpeg'},{src:'images/bow-bag-detail.jpeg'}],
+    swatchColors:SCRUNCHIE_COLORS},
+  {id:'monster-plushie', cat:'single', name:'Soft Plushies', price:10, customFee:0, hideCustomOption:true,
+    desc:'Amigurumi-style stuffed animal, fun collectible gaming look.',
+    // No color-linked photos anymore — color is chosen from the swatch chart
+    // below instead, so these are just general views of the plushie.
+    images:[{src:'images/monster-blue.jpeg'},{src:'images/monster-red.jpg'},{src:'images/monster-gray.jpg'}],
+    swatchColors:PLUSHIE_COLORS},
+  {id:'cactus-monster', cat:'single', name:'Cacti Desk Buddies', customFee:0, hideCustomOption:true,
+    priceOptions:[
+      {key:'small', label:'Small — $12.00', price:12},
+      {key:'medium', label:'Medium — $17.00', price:17},
+      {key:'large', label:'Large — $25.00', price:25}
+    ],
+    // Each image lines up by POSITION with the priceOptions entry above
+    // (index 0 = Small, 1 = Medium, 2 = Large). Selecting a size
+    // automatically shows its matching photo — see the priceSelect
+    // carousel-sync code further down if you reorder these.
+    desc:'Desk-decor plush plant amigurumi.',
+    images:[
+      {src:'images/cactus-small.jpg'},
+      {src:'images/cactus-medium.jpg'},
+      {src:'images/cactus-large.jpg'}
+    ]},
+  {id:'keychain', cat:'single', name:'Keychains', price:5, customFee:0, variantLabel:'Select Style', hideCustomOption:true,
+    desc:'Hand-sized decorative amigurumi keychain with metal ring attachment.',
+    images:[
+      {src:'images/keychain-pumpkin.jpg', color:'Pumpkin'},
+      {src:'images/keychain-flowers.jpg', color:'Flowers'},
+      {src:'images/keychain-acorns.jpg', color:'Acorns'},
+      {src:'images/keychain-bows.jpg', color:'Bows'}
+    ]},
+];
+
+// ---- CAROUSEL ----
+function carouselHTML(images, uid){
+  const n = images.length;
+  const slides = images.map(im=>`<img src="${im.src}" alt="" class="w-full h-52 object-cover flex-shrink-0" style="width:${100/n}%" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';">`).join('');
+  const dots = n>1 ? `<div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">${images.map((_,i)=>`<span class="dot w-1.5 h-1.5 rounded-full bg-cream/80 ${i===0?'active':''}" data-i="${i}"></span>`).join('')}</div>` : '';
+  const arrows = n>1 ? `
+    <button class="c-prev absolute left-1 top-1/2 -translate-y-1/2 bg-cream/80 hover:bg-cream w-7 h-7 rounded-full text-sm" aria-label="Previous image">&#8249;</button>
+    <button class="c-next absolute right-1 top-1/2 -translate-y-1/2 bg-cream/80 hover:bg-cream w-7 h-7 rounded-full text-sm" aria-label="Next image">&#8250;</button>` : '';
+  return `<div class="relative overflow-hidden rounded-t-2xl bg-oat" data-carousel="${uid}" data-count="${n}" data-index="0">
+    <div class="carousel-track flex" style="width:${n*100}%">${slides}</div>${arrows}${dots}</div>`;
+}
+
+// ---- PRODUCT CARD ----
+function productCard(p){
+  const hasColors = p.images.every(im=>im.color);
+  const colorSelect = hasColors ? `
+    <label class="block text-xs text-cocoa/70 mt-3 mb-1">${p.variantLabel || 'Select Color'}</label>
+    <select class="color-select w-full border border-tan/50 rounded-lg px-2 py-1.5 text-sm">
+      ${p.images.map((im,i)=>`<option value="${im.color}" data-index="${i}">${im.color}</option>`).join('')}
+    </select>` : '';
+  const swatchSelect = p.swatchColors ? `
+    <label class="block text-xs text-cocoa/70 mt-3 mb-1">Select Color</label>
+    <div class="swatch-dropdown relative" data-selected="${p.swatchColors[0].name}">
+      <button type="button" class="swatch-toggle w-full flex items-center justify-between border border-tan/50 rounded-lg px-2 py-1.5 text-sm bg-white">
+        <span class="flex items-center gap-2">
+          <span class="swatch-dot w-4 h-4 rounded-full border border-cocoa/20 flex-shrink-0" style="background:${p.swatchColors[0].hex}"></span>
+          <span class="swatch-label">${p.swatchColors[0].name}</span>
+        </span>
+        <span class="text-cocoa/50">&#9662;</span>
+      </button>
+      <div class="swatch-panel hidden absolute z-10 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-tan/40 rounded-lg shadow-lg p-2 grid grid-cols-5 gap-2">
+        ${p.swatchColors.map(c=>`<button type="button" class="swatch-option w-7 h-7 rounded-full border border-cocoa/20 hover:ring-2 hover:ring-rust" style="background:${c.hex}" data-name="${c.name}" title="${c.name}" aria-label="${c.name}"></button>`).join('')}
+      </div>
+    </div>` : '';
+  const priceSelect = p.priceOptions ? `
+    <label class="block text-xs text-cocoa/70 mt-3 mb-1">Select Price Option</label>
+    <select class="price-select w-full border border-tan/50 rounded-lg px-2 py-1.5 text-sm">
+      ${p.priceOptions.map(o=>`<option value="${o.key}" data-price="${o.price}">${o.label}</option>`).join('')}
+    </select>` : '';
+  const basePrice = p.priceOptions ? p.priceOptions[0].price : p.price;
+  const priceText = p.priceLabel || `$${basePrice.toFixed(2)}`;
+  return `<div class="product-card bg-white/60 border border-tan/30 rounded-2xl flex flex-col" data-id="${p.id}" data-price="${basePrice}" data-fee="${p.customFee}" data-name="${p.name}">
+    <div class="rounded-t-2xl overflow-hidden">${carouselHTML(p.images, p.id)}</div>
+    <div class="p-4 flex flex-col flex-1">
+      <h3 class="font-display text-lg">${p.name}</h3>
+      <p class="text-sm text-cocoa/70 mt-1">${p.desc}</p>
+      ${colorSelect}
+      ${swatchSelect}
+      ${priceSelect}
+      ${p.hideCustomOption ? '' : `
+      <label class="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+        <input type="checkbox" class="custom-check">
+        <span>Request Custom Customization/Color${p.customFee>0 ? ' (+$5.00)' : ''}</span>
+      </label>
+      <div class="custom-box hidden mt-2">
+        <textarea class="custom-text w-full border border-tan/50 rounded-lg p-2 text-sm" rows="2" placeholder="Type your custom order request details here:"></textarea>
+      </div>`}
+      ${p.hasPompomOption ? `
+      <label class="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+        <input type="checkbox" class="pompom-check" checked>
+        <span>Include Pom-Pom</span>
+      </label>` : ''}
+      <div style="margin-top:0.75rem;">
+        <div class="price-display font-semibold" style="margin-bottom:0.5rem;">${priceText}</div>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="add-btn bg-white border border-rust text-rust text-sm rounded-full px-3 py-1.5 hover:bg-rust hover:text-cream transition-colors">Add to Cart</button>
+          <a class="buy-now-btn bg-rust text-cream text-sm rounded-full px-3 py-1.5 hover:bg-cocoa transition-colors" href="#" target="_blank" rel="noopener">Buy Now</a>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('combo-grid').innerHTML = PRODUCTS.filter(p=>p.cat==='combo').map(productCard).join('');
+document.getElementById('single-grid').innerHTML = PRODUCTS.filter(p=>p.cat==='single').map(productCard).join('');
+
+// ---- CAROUSEL BEHAVIOR (also syncs color <select> and, where the photo
+//      count matches, the price-option <select>) ----
+document.querySelectorAll('[data-carousel]').forEach(el=>{
+  const track = el.querySelector('.carousel-track');
+  const n = +el.dataset.count;
+  const card = el.closest('.product-card');
+  const select = card.querySelector('.color-select');
+  const priceSelect = card.querySelector('.price-select');
+  const move = (i, syncSelect=true)=>{
+    el.dataset.index = i;
+    track.style.transform = `translateX(-${i*(100/n)}%)`;
+    el.querySelectorAll('.dot').forEach((d,di)=>d.classList.toggle('active', di===i));
+    if(syncSelect && select) select.selectedIndex = i;
+  };
+  el.querySelector('.c-next')?.addEventListener('click', ()=>move((+el.dataset.index+1)%n));
+  el.querySelector('.c-prev')?.addEventListener('click', ()=>move((+el.dataset.index-1+n)%n));
+  el.querySelectorAll('.dot').forEach((d,di)=>d.addEventListener('click', ()=>move(di)));
+  select?.addEventListener('change', ()=>move(select.selectedIndex));
+  // Only auto-switch the photo from the price dropdown when there's exactly
+  // one image per price option (e.g. the cactus's Small/Medium/Large). If a
+  // future product has priceOptions but a different photo count, this simply
+  // does nothing rather than jumping to a mismatched image.
+  if (priceSelect && priceSelect.options.length === n) {
+    priceSelect.addEventListener('change', ()=>move(priceSelect.selectedIndex));
+  }
+});
+
+// ---- SWATCH COLOR DROPDOWN (circular color picker, e.g. yarn colors) ----
+document.querySelectorAll('.swatch-dropdown').forEach(dd=>{
+  const toggle = dd.querySelector('.swatch-toggle');
+  const panel = dd.querySelector('.swatch-panel');
+  toggle.addEventListener('click', e=>{
+    e.stopPropagation();
+    document.querySelectorAll('.swatch-panel').forEach(p=>{ if(p!==panel) p.classList.add('hidden'); });
+    panel.classList.toggle('hidden');
+  });
+  dd.querySelectorAll('.swatch-option').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      dd.dataset.selected = opt.dataset.name;
+      dd.querySelector('.swatch-dot').style.background = opt.style.background;
+      dd.querySelector('.swatch-label').textContent = opt.dataset.name;
+      panel.classList.add('hidden');
+    });
+  });
+});
+document.addEventListener('click', ()=>{
+  document.querySelectorAll('.swatch-panel').forEach(p=>p.classList.add('hidden'));
+});
+
+// ---- PRICE OPTIONS + CUSTOM CHECKBOX -> LIVE PRICE DISPLAY + BUY NOW LINK ----
+function resolveBuyLink(card){
+  const id = card.dataset.id;
+  const entry = STRIPE_LINKS[id];
+  if(entry && typeof entry === 'object'){
+    // For multi-tier products, .price-select's value is the tier's `key`
+    // (e.g. 'small', 'jumbo') — matched against STRIPE_LINKS[id][key].
+    const optionKey = card.querySelector('.price-select')?.value;
+    return entry[optionKey] || '';
+  }
+  return entry || '';
+}
+function refreshBuyNow(card){
+  const btn = card.querySelector('.buy-now-btn');
+  const link = resolveBuyLink(card);
+  if(link){
+    btn.href = link;
+    btn.removeAttribute('data-disabled');
+    btn.title = '';
+  } else {
+    btn.href = '#';
+    btn.dataset.disabled = 'true';
+    btn.title = "This item's checkout link hasn't been added yet.";
+  }
+}
+
+document.querySelectorAll('.product-card').forEach(card=>{
+  const check = card.querySelector('.custom-check');
+  const box = card.querySelector('.custom-box');
+  const priceEl = card.querySelector('.price-display');
+  const priceSelect = card.querySelector('.price-select');
+  const hasPriceLabel = priceEl.textContent.includes('for $'); // e.g. "3 for $10" — never overwritten
+
+  function refreshPrice(){
+    if(hasPriceLabel) return;
+    const base = +card.dataset.price;
+    const fee = +card.dataset.fee;
+    const useFee = check?.checked && fee > 0; // check is null for hideCustomOption products
+    priceEl.textContent = useFee
+      ? `$${(base+fee).toFixed(2)} (incl. $5.00 custom fee)`
+      : `$${base.toFixed(2)}`;
+  }
+
+  priceSelect?.addEventListener('change', ()=>{
+    // priceSelect.value is the STRIPE_LINKS key (e.g. 'small'), not the price
+    // — the dollar amount lives in the selected <option>'s data-price.
+    card.dataset.price = priceSelect.selectedOptions[0].dataset.price;
+    refreshPrice();
+    refreshBuyNow(card);
+  });
+  check?.addEventListener('change', ()=>{
+    box.classList.toggle('hidden', !check.checked);
+    refreshPrice();
+  });
+
+  card.querySelector('.buy-now-btn').addEventListener('click', e=>{
+    if(e.currentTarget.dataset.disabled === 'true'){
+      e.preventDefault();
+      alert("This item's Buy Now link hasn't been connected yet.");
+    }
+  });
+
+  refreshBuyNow(card);
+});
+
+// ---- CART (local estimate — not sent to Stripe automatically) ----
+const cart = {};
+function currentImage(card){
+  const select = card.querySelector('.color-select');
+  const imgs = card.querySelectorAll('.carousel-track img');
+  const idx = select ? select.selectedIndex : +card.querySelector('[data-carousel]').dataset.index;
+  return imgs[idx]?.src || imgs[0]?.src;
+}
+
+document.querySelectorAll('.add-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const card = btn.closest('.product-card');
+    const id = card.dataset.id;
+    const base = +card.dataset.price;
+    const fee = +card.dataset.fee;
+    const select = card.querySelector('.color-select');
+    const swatch = card.querySelector('.swatch-dropdown');
+    const color = select ? select.value : (swatch ? swatch.dataset.selected : null);
+    const customCheckEl = card.querySelector('.custom-check'); // null for hideCustomOption products
+    const customChecked = customCheckEl ? customCheckEl.checked : false;
+    const customText = customChecked ? card.querySelector('.custom-text').value.trim() : '';
+    // hasPompomOption products get a checkbox (defaults checked); everything
+    // else has no pompom-check element at all, so `pompom` stays null.
+    const pompomCheck = card.querySelector('.pompom-check');
+    const pompom = pompomCheck ? pompomCheck.checked : null;
+    const unitPrice = base + (customChecked ? fee : 0);
+    const thumb = currentImage(card);
+    const key = `${id}|${color||''}|${customChecked?1:0}|${customText}|${pompom}`;
+    if(cart[key]){ cart[key].qty += 1; }
+    else {
+      cart[key] = { name: card.dataset.name, unitPrice, color, customChecked, customFee: customChecked ? fee : 0, customText, pompom, thumb, qty: 1 };
+    }
+    renderCart();
+  });
+});
+
+function renderCart(){
+  const list = document.getElementById('cart-items');
+  const keys = Object.keys(cart);
+  if(!keys.length){
+    list.innerHTML = '<li class="text-cocoa/50 italic">Your cart is empty.</li>';
+  } else {
+    list.innerHTML = keys.map(key=>{
+      const item = cart[key];
+      const subtitles = [
+        item.color ? `Color: ${item.color}` : '',
+        item.pompom === true ? 'Pom-Pom: Yes' : (item.pompom === false ? 'Pom-Pom: No' : ''),
+        item.customChecked && item.customText ? `Custom: "${item.customText}"` : (item.customChecked ? 'Custom order requested' : ''),
+        item.customFee>0 ? `+$${item.customFee.toFixed(2)} custom fee` : ''
+      ].filter(Boolean).map(s=>`<p class="text-xs text-cocoa/60">${s}</p>`).join('');
+      return `<li class="flex gap-2">
+        <img src="${item.thumb}" alt="" class="w-12 h-12 object-cover rounded-lg border border-tan/30 flex-shrink-0" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-medium truncate">${item.name}</span>
+            <button class="remove-btn text-rust hover:text-cocoa flex-shrink-0" data-key="${key}" aria-label="Remove ${item.name}">&times;</button>
+          </div>
+          ${subtitles}
+          <div class="flex items-center justify-between mt-1">
+            <div class="flex items-center gap-1">
+              <button class="qty-btn border border-tan/50 rounded-full w-5 h-5 leading-none hover:bg-oat" data-key="${key}" data-dir="-1">&minus;</button>
+              <span class="w-4 text-center text-xs">${item.qty}</span>
+              <button class="qty-btn border border-tan/50 rounded-full w-5 h-5 leading-none hover:bg-oat" data-key="${key}" data-dir="1">+</button>
+            </div>
+            <span>$${(item.unitPrice*item.qty).toFixed(2)}</span>
+          </div>
+        </div>
+      </li>`;
+    }).join('');
+  }
+  const subtotal = keys.reduce((s,k)=>s+cart[k].unitPrice*cart[k].qty,0);
+  const tax = subtotal * TAX_RATE;
+  const pickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+  const shipping = pickup ? 0 : 6;
+  document.getElementById('cart-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+  document.getElementById('cart-tax').textContent = `$${tax.toFixed(2)}`;
+  document.getElementById('cart-shipping').textContent = `$${shipping.toFixed(2)}`;
+  document.getElementById('cart-total').textContent = `$${(subtotal+tax+shipping).toFixed(2)}`;
+}
+
+document.getElementById('cart-items').addEventListener('click', e=>{
+  const qtyBtn = e.target.closest('.qty-btn');
+  const removeBtn = e.target.closest('.remove-btn');
+  if(qtyBtn){
+    const key = qtyBtn.dataset.key;
+    cart[key].qty += +qtyBtn.dataset.dir;
+    if(cart[key].qty <= 0) delete cart[key];
+    renderCart();
+  } else if(removeBtn){
+    delete cart[removeBtn.dataset.key];
+    renderCart();
+  }
+});
+
+// ---- DELIVERY TOGGLE ----
+document.querySelectorAll('input[name="delivery"]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+    document.getElementById('pickup-fields').classList.toggle('hidden', !isPickup);
+    document.getElementById('ship-note').classList.toggle('hidden', isPickup);
+    renderCart();
+  });
+});
+
+// ---- COPY ORDER SUMMARY (fully static, no fetch/backend involved) ----
+function isValidContact(value){
+  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phone = /^[0-9()+\-.\s]{7,}$/;
+  return email.test(value) || phone.test(value);
+}
+
+document.getElementById('copy-summary-btn').addEventListener('click', async ()=>{
+  const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+  const contactEl = document.getElementById('f-contact');
+  const contact = contactEl.value.trim();
+
+  if(!contact || !isValidContact(contact)){
+    contactEl.classList.add('border-rust', 'ring-1', 'ring-rust');
+    contactEl.focus();
+    alert('Please enter a valid email address or phone number for delivery updates.');
+    return;
+  }
+  contactEl.classList.remove('border-rust', 'ring-1', 'ring-rust');
+
+  if(isPickup){
+    const missing = [document.getElementById('f-building'), document.getElementById('f-apt')].find(f=>!f.value.trim());
+    if(missing){ missing.focus(); alert('Please fill out your Building Number and Apartment Number.'); return; }
+  }
+
+  if(!Object.keys(cart).length){ alert('Your cart is empty.'); return; }
+
+  const subtotal = Object.values(cart).reduce((s,i)=>s+i.unitPrice*i.qty,0);
+  const tax = subtotal * TAX_RATE;
+  const shipping = isPickup ? 0 : 6;
+
+  const lines = [
+    'The Crowned Skein — Order Summary',
+    '',
+    ...Object.values(cart).map(i=>{
+      let l = `${i.qty} x ${i.name}`;
+      if(i.color) l += ` (${i.color})`;
+      if(i.pompom === true) l += ` — with pom-pom`;
+      if(i.pompom === false) l += ` — no pom-pom`;
+      if(i.customChecked) l += ` — CUSTOM${i.customText ? ': ' + i.customText : ''}`;
+      l += ` — $${(i.unitPrice*i.qty).toFixed(2)}`;
+      return l;
+    }),
+    '',
+    `Subtotal: $${subtotal.toFixed(2)}`,
+    `Estimated Tax: $${tax.toFixed(2)}`,
+    `Shipping: $${shipping.toFixed(2)}`,
+    `Total: $${(subtotal+tax+shipping).toFixed(2)}`,
+    '',
+    `Contact: ${contact}`,
+    isPickup
+      ? `Delivery: Local Pickup — Building ${document.getElementById('f-building').value}, Apt ${document.getElementById('f-apt').value}`
+      : 'Delivery: Ship (address entered on Stripe checkout page)'
+  ];
+  const text = lines.join('\n');
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Order summary copied! Paste it into a message to The Crowned Skein, and use each item\'s Buy Now button to pay securely.');
+  } catch (e) {
+    alert(text); // clipboard blocked — show it directly so it's never lost
+  }
+});
+
+// ---- CHECKOUT FULL CART -> STRIPE (via Netlify Function) ----
+// This site is static, so turning several different products into ONE real
+// Stripe transaction requires a tiny bit of server code — your Stripe SECRET
+// key (needed to create a Checkout Session with custom line items and
+// metadata) can never be safely placed in this file. That server code lives
+// in netlify/functions/create-checkout-session.js, which deploys alongside
+// your static files on Netlify (no separate server to run or pay for).
+// This button just packages the current cart + contact + delivery info and
+// sends it there, then follows the real Stripe Checkout URL it returns.
+// If you ever move hosts, only CHECKOUT_ENDPOINT below needs to change.
+const CHECKOUT_ENDPOINT = '/.netlify/functions/create-checkout-session';
+
+document.getElementById('checkout-cart-btn').addEventListener('click', async ()=>{
+  const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+  const contactEl = document.getElementById('f-contact');
+  const contact = contactEl.value.trim();
+
+  // Same validation as the rest of the checkout sidebar: contact info is
+  // always required, and pickup orders additionally need building/apt.
+  if(!contact || !isValidContact(contact)){
+    contactEl.classList.add('border-rust', 'ring-1', 'ring-rust');
+    contactEl.focus();
+    alert('Please enter a valid email address or phone number for delivery updates.');
+    return;
+  }
+  contactEl.classList.remove('border-rust', 'ring-1', 'ring-rust');
+
+  if(isPickup){
+    const requiredFields = [document.getElementById('f-building'), document.getElementById('f-apt')];
+    const missing = requiredFields.find(f => !f.value.trim());
+    if(missing){
+      missing.focus();
+      alert('Please fill out your Building Number and Apartment Number.');
+      return;
+    }
+  }
+
+  if(!Object.keys(cart).length){
+    alert('Your cart is empty.');
+    return;
+  }
+
+  const btn = document.getElementById('checkout-cart-btn');
+  btn.disabled = true;
+  btn.textContent = 'Redirecting to secure checkout…';
+
+  // Everything the server needs to build one Checkout Session: every cart
+  // line (with its color/custom-order info and any $5 custom fee already
+  // folded into unit_price), plus contact + delivery details.
+  const payload = {
+    contact,
+    delivery_method: isPickup ? 'local_pickup' : 'ship',
+    collect_shipping_address: !isPickup, // tells the function to turn on Stripe's own address collection
+    pickup_details: isPickup ? {
+      building_number: document.getElementById('f-building').value,
+      apartment_number: document.getElementById('f-apt').value
+    } : null,
+    items: Object.values(cart).map(i=>({
+      name: i.name, qty: i.qty, unit_price: i.unitPrice, color: i.color || null,
+      pompom: i.pompom, // true, false, or null if this product has no pom-pom option
+      custom_requested: i.customChecked, custom_text: i.customText || null, custom_fee: i.customFee
+    }))
+  };
+
+  try {
+    const res = await fetch(CHECKOUT_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const session = await res.json();
+    if(!res.ok || !session.url) throw new Error(session.error || 'Checkout could not be started.');
+    window.location.href = session.url; // real Stripe-hosted Checkout page
+  } catch (err) {
+    alert('Sorry, checkout could not be started: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Checkout Full Cart';
+  }
+});
+
+renderCart();
+</script>
+</body>
+</html>
