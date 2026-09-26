@@ -20,7 +20,6 @@
   h1,h2,h3,.font-display{font-family:'Fraunces',serif}
   .carousel-track{transition:transform .35s ease}
   .dot.active{background:#5A4230}
-  .buy-now-btn[data-disabled="true"]{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body class="antialiased">
@@ -44,10 +43,15 @@
     4. "$X raised of $Y goal" caption -> edit the numbers in the <p id="..."> line
        right below the bar. Update this every time you update the width above
        so the bar and the text always match.
-  There is nothing else to touch — no separate variable elsewhere controls
-  the banner's numbers or text.
+  The X button in the corner lets you hide the banner for the current page
+  view (handy mid-demo) — refreshing or reopening the page brings it right
+  back, nothing is remembered between visits. Once closed, a tiny dot
+  appears in the top-right corner of the page — click it to bring the
+  banner back without refreshing. There is nothing else to touch — no
+  separate variable elsewhere controls the banner's numbers or text.
 -->
-<div class="bg-cocoa text-cream px-4 py-4 text-center">
+<div id="promo-banner" class="relative bg-cocoa text-cream px-4 py-4 text-center">
+  <button id="banner-close" type="button" aria-label="Hide this banner" class="absolute top-1.5 right-1.5 w-7 h-7 flex items-center justify-center rounded-full text-cream/70 hover:text-cream hover:bg-cream/15 transition-colors text-lg leading-none">&times;</button>
   <p class="text-sm md:text-base">Help us fund a <span class="font-semibold">$4,000 Educational Grant</span> for a local Accelerated Nursing Student at Mercy College! Campaign ends October 31st.</p>
   <div class="max-w-xl mx-auto mt-2">
     <div class="w-full h-3 bg-cream/20 rounded-full overflow-hidden">
@@ -56,11 +60,26 @@
     <p class="text-xs mt-1 text-cream/80">$0 raised of $4,000 goal</p>
   </div>
 </div>
+<!-- Tiny reopen dot, hidden until the banner is closed. Deliberately small
+     and low-contrast so it doesn't draw attention. -->
+<button id="banner-reopen" type="button" aria-label="Show banner" class="hidden fixed top-1 right-1 z-50 w-2.5 h-2.5 rounded-full bg-cocoa/25 hover:bg-cocoa/60 transition-colors"></button>
+<script>
+  var promoBanner = document.getElementById('promo-banner');
+  var reopenDot = document.getElementById('banner-reopen');
+  document.getElementById('banner-close').addEventListener('click', function(){
+    promoBanner.style.display = 'none';
+    reopenDot.classList.remove('hidden');
+  });
+  reopenDot.addEventListener('click', function(){
+    promoBanner.style.display = '';
+    reopenDot.classList.add('hidden');
+  });
+</script>
 
 <!-- 2. HERO / OUR STORY -->
 <section class="max-w-3xl mx-auto px-6 py-16 text-center">
   <h1 class="font-display text-4xl md:text-5xl mb-4">The Crowned Skein</h1>
-  <p class="text-cocoa/80 leading-relaxed">The Crowned Skein is a permanent, Pella-based handmade boutique, stitched together one cozy piece at a time. This season, <span class="font-semibold text-rust">50% of every purchase</span> goes directly into an educational grant check &mdash; helping an Iowa nursing student cover critical tuition and clinical rotation fees. Our campaign concludes on <span class="font-semibold">October 31, 2026</span>, when we'll present the final check to the student ahead of their November tuition deadline.</p>
+  <p class="text-cocoa/80 leading-relaxed">The Crowned Skein is a permanent, Pella-based handmade boutique, stitched together one cozy piece at a time. Shop our full catalog right here online, or find us in person inside <span class="font-semibold">The Cottage Candle Shop</span> in Pella, IA.</p>
 </section>
 
 <!-- 3. PRODUCT CATALOG -->
@@ -102,15 +121,12 @@
       </label>
       <label class="flex items-start gap-2 cursor-pointer">
         <input type="radio" name="delivery" value="pickup" class="mt-1">
-        <span>Free High Point Apartment Delivery / Local Pella Pickup ($0)</span>
+        <span>Pickup at The Cottage Candle Shop ($0)</span>
       </label>
       <p class="text-xs text-cocoa/60 italic">Nationwide shipping via USPS Ground Advantage for a $6.00 flat rate!</p>
-      <p id="ship-note" class="text-xs text-cocoa/60">You'll securely enter your shipping address on the Stripe Checkout page when you click a Buy Now button.</p>
+      <p id="ship-note" class="text-xs text-cocoa/60">You'll securely enter your shipping address on the Stripe Checkout page when you click Checkout Full Cart.</p>
 
-      <div id="pickup-fields" class="hidden space-y-2 pt-1">
-        <input id="f-building" type="text" placeholder="Building Number" class="w-full border border-tan/50 rounded-lg px-3 py-2 text-sm" required>
-        <input id="f-apt" type="text" placeholder="Apartment Number" class="w-full border border-tan/50 rounded-lg px-3 py-2 text-sm" required>
-      </div>
+      <p id="pickup-note" class="hidden text-xs text-cocoa/60">Pick up your order at <strong>The Cottage Candle Shop</strong> in Pella, IA — <a href="https://www.google.com/maps/search/?api=1&query=622+Franklin+St%2C+Pella%2C+IA+50219" target="_blank" rel="noopener" class="underline hover:bg-tan/40 hover:text-cocoa rounded px-0.5 transition-colors">622 Franklin St, Pella, IA 50219</a>. We'll message you at the contact info above once it's ready.</p>
     </div>
 
     <button id="checkout-cart-btn" class="w-full bg-rust text-cream rounded-full py-2.5 mt-4 font-medium hover:bg-cocoa transition-colors">Checkout Full Cart</button>
@@ -123,6 +139,14 @@
 
 <footer class="text-center text-xs text-cocoa/60 py-8 border-t border-tan/30">The Crowned Skein &middot; Pella, Iowa</footer>
 
+<!-- IMAGE LIGHTBOX — one shared full-screen viewer for every product photo.
+     Clicking a carousel's expand icon opens the currently-shown image here.
+     Closes on: the shrink icon, clicking the dark background, or Escape. -->
+<div id="lightbox" class="hidden fixed inset-0 z-[100] bg-black/85 items-center justify-center p-6">
+  <button id="lightbox-close" class="absolute top-4 right-4 bg-cream/90 hover:bg-cream w-10 h-10 rounded-full text-lg" aria-label="Close full image">&times;</button>
+  <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+</div>
+
 <script>
 /* =====================================================================
    THE CROWNED SKEIN — SITE CONFIG
@@ -130,65 +154,22 @@
    Everything you'll ever need to touch to add a product, swap a photo,
    or connect a new price lives in ONE of the four blocks below:
 
-     1. STRIPE_LINKS      -> per-item "Buy Now" checkout links
-     2. TAX_RATE           -> the estimated tax % shown in the cart
-     3. PLACEHOLDER_IMG    -> fallback graphic (don't need to touch this)
-     4. PRODUCTS           -> the actual catalog (name, price, photos, colors)
+     1. TAX_RATE           -> the estimated tax % shown in the cart
+     2. PLACEHOLDER_IMG    -> fallback graphic (don't need to touch this)
+     3. PRODUCTS           -> the actual catalog (name, price, photos, colors)
 
    After PRODUCTS, everything else is display/behavior code — you
    shouldn't need to edit past that unless you're changing how the
    site *works*, not what it *sells*.
    ===================================================================== */
 
-// ---- 1. STRIPE "BUY NOW" LINKS (one item, paid instantly) ----
-// Each key below is a product's `id` (must exactly match the `id` used in
-// the PRODUCTS list further down). The value is that product's Stripe
-// Payment Link URL — NOT a price_... ID. To get one:
-//   Stripe Dashboard -> Product catalog -> open the price -> "Create payment link"
-//   -> copy the resulting https://buy.stripe.com/... URL and paste it below.
-//
-// TO ADD A NEW PRODUCT'S LINK: add a new line   'your-product-id': 'https://buy.stripe.com/...',
-// TO ADD A PRODUCT WITH MULTIPLE PRICE TIERS (like the cactus monster or the
-// scrunchies): use an object mapping each tier's `key` to its own link, e.g.
-//   { small: 'url', medium: 'url', large: 'url' }
-//   — each key must exactly match a `key` in that product's `priceOptions`
-//   array below (NOT the price number — two tiers can share a price, like
-//   the $7 Heavy-Ruffle and Jumbo scrunchies, so keys keep them separate).
-// Leaving a value as '' just greys out that item's Buy Now button until you add one.
-const STRIPE_LINKS = {
-  'gift-box': 'https://buy.stripe.com/9B66oHb64coi7ulgwM0gw0e',
-  'tweed-box': 'https://buy.stripe.com/aFaaEX3DC4VQg0R6Wc0gw0f',
-  'scrunchie-pack': 'https://buy.stripe.com/eVq7sLdec73Y7ulgwM0gw00',
-  'scrunchie-jumbo': {
-    mini: 'https://buy.stripe.com/bJe00jca81JE15X1BS0gw0m',
-    standard: 'https://buy.stripe.com/fZu14n1vucoi7ula8o0gw01', // confirmed correct
-    heavy: 'https://buy.stripe.com/8x23cv4HGewq7ulbcs0gw0l',
-    jumbo: 'https://buy.stripe.com/cNi6oH0rq73Yg0R1BS0gw0k' // now a distinct link from heavy — good
-  },
-  'beanie-luxury': 'https://buy.stripe.com/6oU14n0rqcoi9Ct5S80gw0d',
-  'beanie-split': 'https://buy.stripe.com/5kQbJ1eig1JE6qhcgw0gw0a',
-  'scarf': 'https://buy.stripe.com/00w7sL7TS1JE5mdcgw0gw0j',
-  'shawl': 'https://buy.stripe.com/fZu6oH2zy1JEcOFbcs0gw0b',
-  'headband': 'https://buy.stripe.com/7sY4gzgqodsm9Cta8o0gw09',
-  'handwarmers': 'https://buy.stripe.com/8x200jca80FA3e5a8o0gw08',
-  'bow-bag': 'https://buy.stripe.com/aFa9AT4HGfAu6qhfsI0gw07',
-  'monster-plushie': 'https://buy.stripe.com/3cIcN5b64fAu8ypeoE0gw06',
-  'cactus-monster': {
-    small: 'https://buy.stripe.com/3cI14ngqo5ZUg0R94k0gw03',
-    medium: 'https://buy.stripe.com/4gM00j0rqewq8yp1BS0gw0n',
-    large: 'https://buy.stripe.com/14A3cv6POgEy5md5S80gw0o'
-  },
-  'keychain': 'https://buy.stripe.com/6oU9ATeig1JE8ypeoE0gw0g'
-  // <-- add new products' links here, comma-separated
-};
-
-// ---- 2. ESTIMATED SALES TAX ----
+// ---- 1. ESTIMATED SALES TAX ----
 // Shown in the cart sidebar as a preview only — the real, authoritative tax
 // is whatever Stripe calculates at checkout (via Stripe Tax, if enabled).
 // Update this if your local rate changes.
 const TAX_RATE = 0.07; // Pella, IA combined sales tax (6% state + 1% county) — estimate only
 
-// ---- 3. PLACEHOLDER PHOTO (shown until you add a real image) ----
+// ---- 2. PLACEHOLDER PHOTO (shown until you add a real image) ----
 // This is an inline drawing, not a file — you don't need to touch it. It
 // automatically appears any time an <img> tag's `src` fails to load (e.g.
 // because you haven't uploaded that filename to /images/ yet).
@@ -204,11 +185,11 @@ const PLACEHOLDER_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent
   </svg>`
 );
 
-// ---- 4. PRODUCT CATALOG ----
+// ---- 3. PRODUCT CATALOG ----
 // This is the list you'll edit most often. Each product is one { ... } object.
 // Fields you can use on any product:
-//   id          (required) short unique code, e.g. 'beanie-luxury'. Must match
-//               the key you use for it in STRIPE_LINKS above.
+//   id          (required) short unique code, e.g. 'beanie-luxury'. Must be
+//               unique across the whole catalog.
 //   cat         (required) 'combo' (shows in "Combo Packages & Boxes") or
 //               'single' (shows in "Individual Items")
 //   name        (required) product title shown on the card
@@ -218,10 +199,8 @@ const PLACEHOLDER_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent
 //               an array of { key, label, price }, e.g.:
 //                 [ {key:'small', label:'Small — $12.00', price:12},
 //                   {key:'large', label:'Large — $25.00', price:25} ]
-//               Renders a dropdown using `label` for each option. `key` is
-//               what STRIPE_LINKS uses to find that tier's Buy Now link (use
-//               an object there, e.g. { small: 'url', large: 'url' }) — keys
-//               must be unique even if two tiers share the same `price`.
+//               Renders a dropdown using `label` for each option. `key` must
+//               be unique even if two tiers share the same `price`.
 //   priceLabel  optional text shown instead of a dollar amount, e.g. '3 for $12'
 //               (the underlying `price` is still what gets added to the cart)
 //   customFee   flat $ surcharge added when "Request Custom Customization" is
@@ -251,9 +230,8 @@ const PLACEHOLDER_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent
 //               own product photo per shade). Doesn't change the carousel.
 //
 // TO ADD A BRAND NEW PRODUCT: copy an existing { ... } block below, change
-// every field, give it a new unique `id`, add that `id` to STRIPE_LINKS
-// above, and it will automatically appear in the right grid — no other
-// code changes needed.
+// every field, give it a new unique `id`, and it will automatically appear
+// in the right grid — no other code changes needed.
 
 // Lion Brand 24/7 Cotton colors for the scrunchie line (as supplied by client)
 const SCRUNCHIE_COLORS = [
@@ -313,8 +291,8 @@ const PRODUCTS = [
       {src:'images/tweed-box-forest-moss.jpeg', color:'Forest Moss'},
       {src:'images/tweed-box-woodland-bark.jpeg', color:'Woodland Bark'}
     ]},
-  {id:'scrunchie-pack', cat:'single', name:'Scrunchie Packs', price:12, customFee:0, priceLabel:'3 for $12',
-    desc:'Curated acrylic autumn color mixes.', images:[{src:'images/scrunchie-fall-pack.jpeg'}], swatchColors:SCRUNCHIE_COLORS},
+  {id:'scrunchie-pack', cat:'single', name:'Scrunchie Packs', price:18, customFee:0, priceLabel:'3 for $18',
+    desc:'Curated acrylic autumn color mixes, jumbo scrunchies.', images:[{src:'images/scrunchie-fall-pack.jpeg'}], swatchColors:SCRUNCHIE_COLORS},
   {id:'scrunchie-jumbo', cat:'single', name:'Scrunchies', customFee:0,
     priceOptions:[
       {key:'mini', label:'Mini Scrunchie — $3.00', price:3},
@@ -358,7 +336,7 @@ const PRODUCTS = [
     desc:'Amigurumi-style stuffed animal, fun collectible gaming look.',
     // No color-linked photos anymore — color is chosen from the swatch chart
     // below instead, so these are just general views of the plushie.
-    images:[{src:'images/monster-blue.jpeg'},{src:'images/monster-red.jpg'},{src:'images/monster-gray.jpg'}],
+    images:[{src:'images/monster-blue.jpeg'},{src:'images/monster-red.jpeg'},{src:'images/monster-gray.jpeg'}],
     swatchColors:PLUSHIE_COLORS},
   {id:'cactus-monster', cat:'single', name:'Cacti Desk Buddies', customFee:0, hideCustomOption:true,
     priceOptions:[
@@ -394,8 +372,11 @@ function carouselHTML(images, uid){
   const arrows = n>1 ? `
     <button class="c-prev absolute left-1 top-1/2 -translate-y-1/2 bg-cream/80 hover:bg-cream w-7 h-7 rounded-full text-sm" aria-label="Previous image">&#8249;</button>
     <button class="c-next absolute right-1 top-1/2 -translate-y-1/2 bg-cream/80 hover:bg-cream w-7 h-7 rounded-full text-sm" aria-label="Next image">&#8250;</button>` : '';
+  // Expand icon opens the currently-shown image full-size in the lightbox
+  // (see #lightbox near the end of <body> and openLightbox()/closeLightbox()).
+  const expand = `<button class="carousel-expand absolute top-1 right-1 bg-cream/80 hover:bg-cream w-7 h-7 rounded-full text-sm z-10" aria-label="View full image">&#9974;</button>`;
   return `<div class="relative overflow-hidden rounded-t-2xl bg-oat" data-carousel="${uid}" data-count="${n}" data-index="0">
-    <div class="carousel-track flex" style="width:${n*100}%">${slides}</div>${arrows}${dots}</div>`;
+    <div class="carousel-track flex" style="width:${n*100}%">${slides}</div>${arrows}${dots}${expand}</div>`;
 }
 
 // ---- PRODUCT CARD ----
@@ -451,8 +432,7 @@ function productCard(p){
       <div style="margin-top:0.75rem;">
         <div class="price-display font-semibold" style="margin-bottom:0.5rem;">${priceText}</div>
         <div style="display:flex; gap:0.5rem;">
-          <button class="add-btn bg-white border border-rust text-rust text-sm rounded-full px-3 py-1.5 hover:bg-rust hover:text-cream transition-colors">Add to Cart</button>
-          <a class="buy-now-btn bg-rust text-cream text-sm rounded-full px-3 py-1.5 hover:bg-cocoa transition-colors" href="#" target="_blank" rel="noopener">Buy Now</a>
+          <button class="add-btn bg-rust text-cream text-sm rounded-full px-3 py-1.5 hover:bg-cocoa transition-colors flex-1">Add to Cart</button>
         </div>
       </div>
     </div>
@@ -461,6 +441,27 @@ function productCard(p){
 
 document.getElementById('combo-grid').innerHTML = PRODUCTS.filter(p=>p.cat==='combo').map(productCard).join('');
 document.getElementById('single-grid').innerHTML = PRODUCTS.filter(p=>p.cat==='single').map(productCard).join('');
+
+// ---- IMAGE LIGHTBOX ----
+function openLightbox(src){
+  document.getElementById('lightbox-img').src = src;
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('hidden');
+  lb.classList.add('flex');
+}
+function closeLightbox(){
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('hidden');
+  lb.classList.remove('flex');
+}
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+// Clicking the dark background (but not the image or close button) closes it:
+document.getElementById('lightbox').addEventListener('click', e=>{
+  if(e.target.id === 'lightbox') closeLightbox();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeLightbox();
+});
 
 // ---- CAROUSEL BEHAVIOR (also syncs color <select> and, where the photo
 //      count matches, the price-option <select>) ----
@@ -487,6 +488,10 @@ document.querySelectorAll('[data-carousel]').forEach(el=>{
   if (priceSelect && priceSelect.options.length === n) {
     priceSelect.addEventListener('change', ()=>move(priceSelect.selectedIndex));
   }
+  el.querySelector('.carousel-expand')?.addEventListener('click', ()=>{
+    const currentImg = track.querySelectorAll('img')[+el.dataset.index];
+    openLightbox(currentImg.src);
+  });
 });
 
 // ---- SWATCH COLOR DROPDOWN (circular color picker, e.g. yarn colors) ----
@@ -511,31 +516,7 @@ document.addEventListener('click', ()=>{
   document.querySelectorAll('.swatch-panel').forEach(p=>p.classList.add('hidden'));
 });
 
-// ---- PRICE OPTIONS + CUSTOM CHECKBOX -> LIVE PRICE DISPLAY + BUY NOW LINK ----
-function resolveBuyLink(card){
-  const id = card.dataset.id;
-  const entry = STRIPE_LINKS[id];
-  if(entry && typeof entry === 'object'){
-    // For multi-tier products, .price-select's value is the tier's `key`
-    // (e.g. 'small', 'jumbo') — matched against STRIPE_LINKS[id][key].
-    const optionKey = card.querySelector('.price-select')?.value;
-    return entry[optionKey] || '';
-  }
-  return entry || '';
-}
-function refreshBuyNow(card){
-  const btn = card.querySelector('.buy-now-btn');
-  const link = resolveBuyLink(card);
-  if(link){
-    btn.href = link;
-    btn.removeAttribute('data-disabled');
-    btn.title = '';
-  } else {
-    btn.href = '#';
-    btn.dataset.disabled = 'true';
-    btn.title = "This item's checkout link hasn't been added yet.";
-  }
-}
+// ---- PRICE OPTIONS + CUSTOM CHECKBOX -> LIVE PRICE DISPLAY ----
 
 document.querySelectorAll('.product-card').forEach(card=>{
   const check = card.querySelector('.custom-check');
@@ -555,29 +536,32 @@ document.querySelectorAll('.product-card').forEach(card=>{
   }
 
   priceSelect?.addEventListener('change', ()=>{
-    // priceSelect.value is the STRIPE_LINKS key (e.g. 'small'), not the price
-    // — the dollar amount lives in the selected <option>'s data-price.
+    // priceSelect.value is the tier's `key` (e.g. 'small') — the dollar
+    // amount lives in the selected <option>'s data-price.
     card.dataset.price = priceSelect.selectedOptions[0].dataset.price;
     refreshPrice();
-    refreshBuyNow(card);
   });
   check?.addEventListener('change', ()=>{
     box.classList.toggle('hidden', !check.checked);
     refreshPrice();
   });
-
-  card.querySelector('.buy-now-btn').addEventListener('click', e=>{
-    if(e.currentTarget.dataset.disabled === 'true'){
-      e.preventDefault();
-      alert("This item's Buy Now link hasn't been connected yet.");
-    }
-  });
-
-  refreshBuyNow(card);
 });
 
-// ---- CART (local estimate — not sent to Stripe automatically) ----
+// ---- CART (persisted to this browser via localStorage, so a page refresh
+//      or closing the tab doesn't lose it — it's still not sent to Stripe
+//      until Checkout Full Cart is clicked) ----
+const CART_STORAGE_KEY = 'crownedSkeinCart';
 const cart = {};
+try {
+  const saved = localStorage.getItem(CART_STORAGE_KEY);
+  if (saved) Object.assign(cart, JSON.parse(saved));
+} catch (e) {
+  console.warn('Could not restore saved cart:', e);
+}
+function saveCart(){
+  try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); }
+  catch (e) { console.warn('Could not save cart:', e); }
+}
 function currentImage(card){
   const select = card.querySelector('.color-select');
   const imgs = card.querySelectorAll('.carousel-track img');
@@ -648,12 +632,13 @@ function renderCart(){
   }
   const subtotal = keys.reduce((s,k)=>s+cart[k].unitPrice*cart[k].qty,0);
   const tax = subtotal * TAX_RATE;
-  const pickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
-  const shipping = pickup ? 0 : 6;
+  const deliveryValue = document.querySelector('input[name="delivery"]:checked').value;
+  const shipping = deliveryValue === 'ship' ? 6 : 0;
   document.getElementById('cart-subtotal').textContent = `$${subtotal.toFixed(2)}`;
   document.getElementById('cart-tax').textContent = `$${tax.toFixed(2)}`;
   document.getElementById('cart-shipping').textContent = `$${shipping.toFixed(2)}`;
   document.getElementById('cart-total').textContent = `$${(subtotal+tax+shipping).toFixed(2)}`;
+  saveCart();
 }
 
 document.getElementById('cart-items').addEventListener('click', e=>{
@@ -673,9 +658,9 @@ document.getElementById('cart-items').addEventListener('click', e=>{
 // ---- DELIVERY TOGGLE ----
 document.querySelectorAll('input[name="delivery"]').forEach(r=>{
   r.addEventListener('change', ()=>{
-    const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
-    document.getElementById('pickup-fields').classList.toggle('hidden', !isPickup);
-    document.getElementById('ship-note').classList.toggle('hidden', isPickup);
+    const value = document.querySelector('input[name="delivery"]:checked').value;
+    document.getElementById('ship-note').classList.toggle('hidden', value !== 'ship');
+    document.getElementById('pickup-note').classList.toggle('hidden', value !== 'pickup');
     renderCart();
   });
 });
@@ -688,7 +673,7 @@ function isValidContact(value){
 }
 
 document.getElementById('copy-summary-btn').addEventListener('click', async ()=>{
-  const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+  const deliveryValue = document.querySelector('input[name="delivery"]:checked').value;
   const contactEl = document.getElementById('f-contact');
   const contact = contactEl.value.trim();
 
@@ -700,16 +685,15 @@ document.getElementById('copy-summary-btn').addEventListener('click', async ()=>
   }
   contactEl.classList.remove('border-rust', 'ring-1', 'ring-rust');
 
-  if(isPickup){
-    const missing = [document.getElementById('f-building'), document.getElementById('f-apt')].find(f=>!f.value.trim());
-    if(missing){ missing.focus(); alert('Please fill out your Building Number and Apartment Number.'); return; }
-  }
-
   if(!Object.keys(cart).length){ alert('Your cart is empty.'); return; }
 
   const subtotal = Object.values(cart).reduce((s,i)=>s+i.unitPrice*i.qty,0);
   const tax = subtotal * TAX_RATE;
-  const shipping = isPickup ? 0 : 6;
+  const shipping = deliveryValue === 'ship' ? 6 : 0;
+
+  const deliveryLine = deliveryValue === 'ship'
+    ? 'Delivery: Ship (address entered on Stripe checkout page)'
+    : 'Delivery: Pickup at The Cottage Candle Shop';
 
   const lines = [
     'The Crowned Skein — Order Summary',
@@ -730,15 +714,13 @@ document.getElementById('copy-summary-btn').addEventListener('click', async ()=>
     `Total: $${(subtotal+tax+shipping).toFixed(2)}`,
     '',
     `Contact: ${contact}`,
-    isPickup
-      ? `Delivery: Local Pickup — Building ${document.getElementById('f-building').value}, Apt ${document.getElementById('f-apt').value}`
-      : 'Delivery: Ship (address entered on Stripe checkout page)'
+    deliveryLine
   ];
   const text = lines.join('\n');
 
   try {
     await navigator.clipboard.writeText(text);
-    alert('Order summary copied! Paste it into a message to The Crowned Skein, and use each item\'s Buy Now button to pay securely.');
+    alert('Order summary copied! Paste it into a message to The Crowned Skein, and use Checkout Full Cart to pay securely.');
   } catch (e) {
     alert(text); // clipboard blocked — show it directly so it's never lost
   }
@@ -757,12 +739,12 @@ document.getElementById('copy-summary-btn').addEventListener('click', async ()=>
 const CHECKOUT_ENDPOINT = '/.netlify/functions/create-checkout-session';
 
 document.getElementById('checkout-cart-btn').addEventListener('click', async ()=>{
-  const isPickup = document.querySelector('input[name="delivery"]:checked').value === 'pickup';
+  const deliveryValue = document.querySelector('input[name="delivery"]:checked').value;
   const contactEl = document.getElementById('f-contact');
   const contact = contactEl.value.trim();
 
   // Same validation as the rest of the checkout sidebar: contact info is
-  // always required, and pickup orders additionally need building/apt.
+  // always required.
   if(!contact || !isValidContact(contact)){
     contactEl.classList.add('border-rust', 'ring-1', 'ring-rust');
     contactEl.focus();
@@ -770,16 +752,6 @@ document.getElementById('checkout-cart-btn').addEventListener('click', async ()=
     return;
   }
   contactEl.classList.remove('border-rust', 'ring-1', 'ring-rust');
-
-  if(isPickup){
-    const requiredFields = [document.getElementById('f-building'), document.getElementById('f-apt')];
-    const missing = requiredFields.find(f => !f.value.trim());
-    if(missing){
-      missing.focus();
-      alert('Please fill out your Building Number and Apartment Number.');
-      return;
-    }
-  }
 
   if(!Object.keys(cart).length){
     alert('Your cart is empty.');
@@ -795,12 +767,9 @@ document.getElementById('checkout-cart-btn').addEventListener('click', async ()=
   // folded into unit_price), plus contact + delivery details.
   const payload = {
     contact,
-    delivery_method: isPickup ? 'local_pickup' : 'ship',
-    collect_shipping_address: !isPickup, // tells the function to turn on Stripe's own address collection
-    pickup_details: isPickup ? {
-      building_number: document.getElementById('f-building').value,
-      apartment_number: document.getElementById('f-apt').value
-    } : null,
+    delivery_method: deliveryValue, // 'ship' | 'pickup'
+    collect_shipping_address: deliveryValue === 'ship', // tells the function to turn on Stripe's own address collection
+    pickup_location: deliveryValue === 'pickup' ? 'The Cottage Candle Shop' : null,
     items: Object.values(cart).map(i=>({
       name: i.name, qty: i.qty, unit_price: i.unitPrice, color: i.color || null,
       pompom: i.pompom, // true, false, or null if this product has no pom-pom option
