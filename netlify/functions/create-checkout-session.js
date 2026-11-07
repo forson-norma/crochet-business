@@ -68,11 +68,11 @@ exports.handler = async (event) => {
       };
     });
 
-    // Flat-rate shipping as its own line item. Local pickup/delivery is $0,
-    // so we simply don't add a shipping line for that case.
+    // Flat-rate shipping as its own line item — only for "ship" orders.
+    // Pickup is $0, so no shipping line is added for it.
     // TO CHANGE THE SHIPPING PRICE: update both this 600 (cents) and the
     // "$6.00 Flat Rate" text in index.html's delivery radio label.
-    if (order.delivery_method !== 'local_pickup') {
+    if (order.delivery_method === 'ship') {
       line_items.push({
         price_data: {
           currency: 'usd',
@@ -89,25 +89,25 @@ exports.handler = async (event) => {
       mode: 'payment',
       line_items,
       customer_email: order.contact && order.contact.includes('@') ? order.contact : undefined,
-      // "Ship to Me" orders collect the address on Stripe's own hosted page:
+      // Only "Ship to Me" orders collect an address on Stripe's own hosted
+      // page — Pickup needs no address at all.
       shipping_address_collection: order.collect_shipping_address
         ? { allowed_countries: ['US'] }
         : undefined,
       // Requires Stripe Tax to be enabled on your account (Settings -> Tax),
       // with your nexus/registrations set up there. For "Ship to Me" orders,
       // Stripe calculates tax from the shipping address collected above; for
-      // local pickup orders (no shipping address), it falls back to your
+      // Pickup (no Stripe-collected address), it falls back to your
       // business's registered address.
       automatic_tax: { enabled: true },
       success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/`,
-      // Local pickup orders pass Building/Apartment number here instead of a
-      // shipping address, alongside contact info for reference:
+      // The pickup location name travels here instead of a Stripe-collected
+      // shipping address:
       metadata: {
         contact: order.contact || '',
-        delivery_method: order.delivery_method || 'ship',
-        building_number: (order.pickup_details && order.pickup_details.building_number) || '',
-        apartment_number: (order.pickup_details && order.pickup_details.apartment_number) || ''
+        delivery_method: order.delivery_method || 'ship', // 'ship' | 'pickup'
+        pickup_location: order.pickup_location || ''
       }
     });
 
